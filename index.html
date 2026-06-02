@@ -1,0 +1,316 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{padding:1rem 0;font-family:var(--font-sans)}
+.header{margin-bottom:1.25rem}
+.header h2{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.header p{font-size:13px;color:var(--color-text-secondary)}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.25rem}
+.topic-btn{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 8px;text-align:center;cursor:pointer;font-size:12px;color:var(--color-text-primary);transition:all 0.15s;line-height:1.4}
+.topic-btn:hover{background:var(--color-background-secondary)}
+.topic-btn.active{border:2px solid #7F77DD;background:#EEEDFE;color:#3C3489}
+.topic-btn .icon{font-size:18px;display:block;margin-bottom:4px}
+.panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.panel-tabs{display:flex;border-bottom:0.5px solid var(--color-border-tertiary)}
+.tab{flex:1;padding:10px;text-align:center;font-size:13px;cursor:pointer;color:var(--color-text-secondary);background:var(--color-background-secondary);border:none;transition:all 0.15s}
+.tab.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500}
+.tab-content{padding:1.25rem;display:none}
+.tab-content.active{display:block}
+.learn-section{margin-bottom:1rem}
+.concept-label{font-size:11px;font-weight:500;color:#534AB7;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.concept-text{font-size:14px;color:var(--color-text-primary);line-height:1.65;margin-bottom:10px}
+.code-example{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;font-family:var(--font-mono);font-size:13px;color:var(--color-text-primary);white-space:pre;margin-bottom:10px;overflow-x:auto}
+.tip-box{background:#EEEDFE;border:0.5px solid #AFA9EC;border-radius:var(--border-radius-md);padding:10px 14px;font-size:13px;color:#3C3489;margin-bottom:10px}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:14px 0}
+.q-meta{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px}
+.progress{height:3px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:12px}
+.progress-fill{height:100%;background:#7F77DD;border-radius:2px;transition:width .3s}
+.q-text{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;line-height:1.5}
+.code-block{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 12px;font-family:var(--font-mono);font-size:13px;color:var(--color-text-primary);margin-bottom:10px;white-space:pre}
+.options{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.opt{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:9px 12px;text-align:left;cursor:pointer;font-size:13px;color:var(--color-text-primary);transition:all 0.15s}
+.opt:hover:not(:disabled){background:var(--color-background-secondary)}
+.opt.correct{border:2px solid #1D9E75;background:#E1F5EE;color:#085041}
+.opt.wrong{border:2px solid #E24B4A;background:#FCEBEB;color:#791F1F}
+.opt:disabled{cursor:default}
+.feedback{border-radius:var(--border-radius-md);padding:9px 12px;font-size:13px;margin-bottom:10px;display:none;line-height:1.5}
+.feedback.show{display:block}
+.feedback.ok{background:#E1F5EE;color:#085041;border:0.5px solid #5DCAA5}
+.feedback.fail{background:#FCEBEB;color:#791F1F;border:0.5px solid #F09595}
+.nav-row{display:flex;gap:8px;align-items:center}
+.nav-row button,.retry-btn,.menu-btn{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:7px 14px;font-size:13px;cursor:pointer;color:var(--color-text-primary)}
+.nav-row button:hover,.retry-btn:hover,.menu-btn:hover{background:var(--color-background-secondary)}
+.score-badge{margin-left:auto;font-size:12px;color:var(--color-text-secondary)}
+.result-card{text-align:center;padding:2rem 1rem}
+.big-score{font-size:44px;font-weight:500;color:#534AB7}
+.result-msg{color:var(--color-text-secondary);font-size:14px;margin:8px 0 4px}
+.result-pct{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem}
+.result-btns{display:flex;gap:8px;justify-content:center}
+.topic-tag{display:inline-block;font-size:11px;background:#EEEDFE;color:#3C3489;border-radius:999px;padding:2px 10px;margin-bottom:8px}
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Repaso interactivo de Python para estudiantes</h2>
+<div class="app">
+  <div class="header">
+    <h2>Repaso de Python <i class="ti ti-brand-python" aria-hidden="true" style="color:#534AB7"></i></h2>
+    <p>Elige un tema, lee la explicación, mira el ejemplo y pon a prueba lo que aprendiste</p>
+  </div>
+  <div class="topic-grid" id="topicGrid"></div>
+  <div class="panel" id="panel" style="display:none"></div>
+</div>
+
+<script>
+const topics=[
+  {id:'print',label:'print()',icon:'ti-terminal-2'},
+  {id:'variables',label:'Variables',icon:'ti-box'},
+  {id:'input',label:'input()',icon:'ti-keyboard'},
+  {id:'conditionals',label:'Condicionales',icon:'ti-git-branch'},
+  {id:'random',label:'random',icon:'ti-dice'},
+  {id:'time',label:'time.sleep()',icon:'ti-clock'},
+  {id:'while',label:'while True',icon:'ti-repeat'},
+  {id:'for',label:'for / range',icon:'ti-rotate-clockwise'},
+];
+
+const data={
+  print:{
+    title:'print()',
+    concepts:[
+      {label:'¿Qué es?',text:'<code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">print()</code> es el comando que me ayuda a mostrar mensajes por consola. Todo lo que pongamos dentro se verá en pantalla cuando corramos el programa.'},
+      {label:'¿Cómo se usa?',text:'Podemos poner texto entre comillas, variables, o mezclar los dos separándolos con coma. Python pondrá un espacio automático entre cada cosa que pongamos.'},
+    ],
+    examples:[
+      {label:'Mostrar un mensaje de texto',code:'print("Hola, bienvenido al programa")'},
+      {label:'Mostrar texto y una variable juntos',code:'nombre = "Ana"\nprint("Hola", nombre)'},
+      {label:'Mostrar varias cosas a la vez',code:'edad = 15\nprint("Tu nombre es", nombre, "y tienes", edad, "años")'},
+    ],
+    tip:'Recuerda: el texto siempre va entre comillas " " y las variables se escriben sin comillas.',
+    qs:[
+      {q:'¿Para qué sirve la función print()?',code:null,opts:['Para leer datos del usuario','Para mostrar mensajes por consola','Para generar números aleatorios','Para pausar el programa'],ans:1,exp:'print() nos ayuda a mostrar mensajes por consola. Todo lo que ponemos dentro aparece en pantalla.'},
+      {q:'¿Qué mostrará este código?',code:'nombre = "Ana"\nprint("Hola", nombre)',opts:['"Hola nombre"','Hola nombre','Hola Ana','Error de sintaxis'],ans:2,exp:'print() separa con coma texto y variables. Muestra: Hola Ana'},
+      {q:'¿Cuántos argumentos puede recibir print()?',code:null,opts:['Solo uno','Máximo dos','Los que necesitemos, separados por coma','Ninguno'],ans:2,exp:'print() puede recibir múltiples argumentos separados por coma y los mostrará juntos.'},
+      {q:'¿Cuál de estos códigos mostrará correctamente un mensaje?',code:null,opts:['print(Hola mundo)','print("Hola mundo")','Print("Hola mundo")','print["Hola mundo"]'],ans:1,exp:'El texto debe ir entre comillas dobles y print se escribe en minúsculas.'},
+    ]
+  },
+  variables:{
+    title:'Variables',
+    concepts:[
+      {label:'¿Qué son?',text:'Las variables son cajitas que nos almacenan lo que deseemos: texto, números, decimales, lo que sea. Podemos ponerles el nombre que queramos (sin espacios ni caracteres especiales) y luego usarlas en cualquier parte del programa.'},
+      {label:'¿Cómo se crean?',text:'Escribimos el nombre de la cajita, luego el signo igual <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">=</code> y después el valor que queremos guardar. Si es texto, va entre comillas; si es número, sin comillas.'},
+    ],
+    examples:[
+      {label:'Variable con texto',code:'nombre = "Carlos"'},
+      {label:'Variable con número entero',code:'edad = 17'},
+      {label:'Variable con decimal',code:'nota = 4.5'},
+      {label:'Cambiar el valor de una variable',code:'x = 10\nx = x + 5\nprint(x)   # muestra 15'},
+    ],
+    tip:'El nombre de la variable va a la izquierda del = y el valor a la derecha. ¡No al revés!',
+    qs:[
+      {q:'¿Qué son las variables en programación?',code:null,opts:['Comandos para mostrar mensajes','Cajitas que almacenan cualquier dato','Ciclos que se repiten','Condiciones del programa'],ans:1,exp:'Las variables son cajitas que nos almacenan lo que deseemos: números, texto, decimales, etc.'},
+      {q:'¿Cuál es una variable correctamente declarada?',code:null,opts:['print = "hola"','nombre = "Carlos"','123abc = 10','mi variable = 5'],ans:1,exp:'"nombre = "Carlos"" está bien escrita: nombre válido, signo = y valor entre comillas.'},
+      {q:'¿Qué valor tendrá x después de este código?',code:'x = 10\nx = x + 5',opts:['10','5','15','Error'],ans:2,exp:'x empieza en 10, luego le sumamos 5, entonces x queda en 15.'},
+      {q:'¿Qué tipo de variable es esta?',code:'precio = 9.99',opts:['Variable de texto','Variable entera','Variable decimal (float)','Variable vacía'],ans:2,exp:'9.99 tiene punto decimal, así que es una variable de tipo float (decimal).'},
+    ]
+  },
+  input:{
+    title:'input()',
+    concepts:[
+      {label:'¿Qué es?',text:'<code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">input()</code> nos ayuda a leer datos que escribe el usuario por consola. El programa se detiene, espera que el usuario escriba algo y presione Enter, y luego guarda ese dato en una variable.'},
+      {label:'¿Qué pasa con los números?',text:'input() siempre guarda el dato como texto. Si necesitamos un número entero, usamos <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">int()</code> antes. Si necesitamos decimal, usamos <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">float()</code> antes.'},
+    ],
+    examples:[
+      {label:'Pedir el nombre (texto)',code:'nombre = input("Escribe tu nombre: ")'},
+      {label:'Pedir la edad (número entero)',code:'edad = int(input("Escribe tu edad: "))'},
+      {label:'Pedir una nota (decimal)',code:'nota = float(input("Escribe tu nota: "))'},
+      {label:'Usar lo que escribió el usuario',code:'nombre = input("¿Cómo te llamas? ")\nprint("Hola", nombre)'},
+    ],
+    tip:'Recuerda: sin int() o float(), todo lo que escribe el usuario se guarda como texto, no como número.',
+    qs:[
+      {q:'¿Para qué sirve la función input()?',code:null,opts:['Mostrar mensajes en pantalla','Generar números aleatorios','Leer datos que escribe el usuario','Pausar el programa'],ans:2,exp:'input() nos ayuda a leer datos que escribe el usuario por consola.'},
+      {q:'¿Cómo pedimos la edad como número entero?',code:null,opts:['edad = input("tu edad")','edad = int("tu edad")','edad = int(input("Escribe tu edad: "))','edad = float(input("Escribe tu edad: "))'],ans:2,exp:'int(input("...")) primero lee el texto del usuario y luego lo convierte a número entero.'},
+      {q:'¿Qué hace int() en este código?',code:'edad = int(input("Escribe tu edad: "))',opts:['Muestra la edad en pantalla','Convierte el texto a número entero','Genera un número aleatorio','Repite el código'],ans:1,exp:'int() convierte el texto que escribe el usuario a un número entero para poder hacer cálculos.'},
+      {q:'Si el usuario escribe "15" sin usar int(), ¿qué tipo de dato queda guardado?',code:'dato = input("Número: ")',opts:['Número entero','Número decimal','Texto (string)','Error'],ans:2,exp:'input() siempre guarda el dato como texto (string), aunque el usuario escriba un número.'},
+    ]
+  },
+  conditionals:{
+    title:'Condicionales',
+    concepts:[
+      {label:'¿Qué son?',text:'Los condicionales nos permiten hacer que el programa tome diferentes caminos según una condición. Si algo es verdad, hace una cosa; si no, hace otra.'},
+      {label:'Palabras clave',text:'<b style="font-weight:500">if</b> es la primera palabrita para escribir una condición. <b style="font-weight:500">elif</b> es la palabra para buscar más caminos (si la anterior no se cumplió). <b style="font-weight:500">else</b> es la condición de descarte: se ejecuta cuando ninguna condición anterior fue verdadera.'},
+      {label:'Operadores and / or',text:'<b style="font-weight:500">and</b>: sí o sí se deben cumplir las dos condiciones al mismo tiempo para que sea verdad. <b style="font-weight:500">or</b>: es para escoger alguna de las dos; basta con que se cumpla una.'},
+    ],
+    examples:[
+      {label:'Estructura básica if / elif / else',code:'if edad >= 18:\n    print("Eres mayor de edad")\nelif edad >= 13:\n    print("Eres adolescente")\nelse:\n    print("Eres niño")'},
+      {label:'Usando and (las dos deben cumplirse)',code:'if edad > 18 and nombre != "":\n    print("Datos válidos")'},
+      {label:'Usando or (basta con una)',code:'if color == "rojo" or color == "verde":\n    print("Color permitido")'},
+    ],
+    tip:'Al final de cada if, elif y else siempre va dos puntos : y el código de adentro va con sangría (Tab).',
+    qs:[
+      {q:'¿Cuál es la primera palabra para escribir una condición?',code:null,opts:['elif','else','if','when'],ans:2,exp:'"if" es la primera palabrita para escribir condiciones en Python.'},
+      {q:'¿Qué usamos para agregar más caminos a una condición?',code:null,opts:['if','else','elif','and'],ans:2,exp:'"elif" es la palabra para buscar más caminos cuando la condición del if no se cumplió.'},
+      {q:'¿Qué hace el operador "and"?',code:'if edad > 18 and nombre != "":',opts:['Basta con que se cumpla una condición','Sí o sí deben cumplirse las dos condiciones','Es la condición de descarte','Genera un número'],ans:1,exp:'"and" requiere que sí o sí se cumplan las dos condiciones al mismo tiempo.'},
+      {q:'¿Para qué sirve "else"?',code:null,opts:['Es la primera condición','Agrega más caminos','Se ejecuta cuando ninguna condición anterior fue verdadera','Repite el código'],ans:2,exp:'"else" es la condición de descarte: se ejecuta cuando ningún if ni elif anterior fue verdadero.'},
+      {q:'¿Qué hace el operador "or"?',code:'if color == "rojo" or color == "azul":',opts:['Las dos condiciones deben cumplirse','Basta con que se cumpla una de las dos','Descarta todas las condiciones','Pausa el programa'],ans:1,exp:'"or" es para escoger alguna de las dos: basta con que una condición sea verdadera.'},
+    ]
+  },
+  random:{
+    title:'random',
+    concepts:[
+      {label:'¿Qué es?',text:'El módulo <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">random</code> nos permite generar números aleatorios. Primero debemos importarlo escribiendo <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">import random</code> al inicio del programa.'},
+      {label:'randint()',text:'<code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">random.randint(a, b)</code> genera un número entero aleatorio en el rango que yo quiera, incluyendo los dos extremos. Si pongo randint(1, 10) puede salir cualquier número del 1 al 10.'},
+    ],
+    examples:[
+      {label:'Importar el módulo',code:'import random'},
+      {label:'Número aleatorio entre 1 y 10',code:'numero = random.randint(1, 10)\nprint("Salió:", numero)'},
+      {label:'Simular un dado de 6 caras',code:'dado = random.randint(1, 6)\nprint("El dado cayó en:", dado)'},
+    ],
+    tip:'El import siempre va al principio del programa, antes de usarlo. randint incluye los dos números que pones: desde 1 hasta 10 (ambos incluidos).',
+    qs:[
+      {q:'¿Qué genera este código?',code:'numero = random.randint(1, 10)',opts:['Siempre el número 5','Un número aleatorio entre 1 y 10','Un número entre 0 y 9','Un texto aleatorio'],ans:1,exp:'random.randint(1, 10) genera un número aleatorio del 1 al 10, incluyendo ambos extremos.'},
+      {q:'¿Del 1 al 6, cuántos números puede generar este código?',code:'dado = random.randint(1, 6)',opts:['Del 0 al 5','Del 1 al 6','Del 0 al 6','Del 1 al 5'],ans:1,exp:'randint incluye ambos extremos, por eso genera del 1 al 6, igual que un dado real.'},
+      {q:'¿Qué debemos escribir al inicio del programa para usar randint?',code:null,opts:['import time','import math','import random','import sys'],ans:2,exp:'Necesitamos "import random" al inicio para poder usar random.randint().'},
+      {q:'¿Qué saldrá en pantalla cada vez que corramos este código?',code:'print(random.randint(1, 3))',opts:['Siempre 1','Siempre 3','Siempre 2','Un número diferente (1, 2 o 3)'],ans:3,exp:'Cada vez que corra el programa puede salir 1, 2 o 3, porque es aleatorio.'},
+    ]
+  },
+  time:{
+    title:'time.sleep()',
+    concepts:[
+      {label:'¿Qué es?',text:'El módulo <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">time</code> nos ayuda a controlar el tiempo en nuestro programa. Con <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">time.sleep()</code> hacemos que el programa espere (pause) los segundos que nosotros indiquemos antes de continuar.'},
+      {label:'¿Cómo se usa?',text:'Primero importamos con <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">import time</code>. Luego, donde queramos la pausa, escribimos <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">time.sleep(segundos)</code>. El número dentro de los paréntesis es cuántos segundos esperará.'},
+    ],
+    examples:[
+      {label:'Importar el módulo',code:'import time'},
+      {label:'Pausar 3 segundos',code:'print("Preparado...")\ntime.sleep(3)\nprint("¡Ya!")'},
+      {label:'Cuenta regresiva',code:'print("3")\ntime.sleep(1)\nprint("2")\ntime.sleep(1)\nprint("1")\ntime.sleep(1)\nprint("¡Ya!")'},
+    ],
+    tip:'Puedes usar decimales: time.sleep(0.5) espera medio segundo. Muy útil para animar mensajes o crear suspenso.',
+    qs:[
+      {q:'¿Para qué sirve time.sleep()?',code:null,opts:['Mostrar la hora actual','Pausar el programa los segundos que indiquemos','Repetir código varias veces','Guardar datos'],ans:1,exp:'time.sleep() hace que el programa espere los segundos que le indiquemos antes de continuar.'},
+      {q:'¿Cuántos segundos espera este código?',code:'print("preparado...")\ntime.sleep(3)\nprint("¡ya!")',opts:['1 segundo','3 segundos','10 segundos','No espera nada'],ans:1,exp:'time.sleep(3) pausa el programa exactamente 3 segundos entre los dos print.'},
+      {q:'¿Qué módulo importamos para usar time.sleep()?',code:null,opts:['import random','import sleep','import time','import pause'],ans:2,exp:'Se necesita "import time" al inicio del programa para poder usar time.sleep().'},
+      {q:'¿Qué mostrará este código primero?',code:'print("Hola")\ntime.sleep(5)\nprint("Adiós")',opts:['"Hola" y "Adiós" al mismo tiempo','Primero "Adiós", luego "Hola"','Primero "Hola", pausa 5 seg, luego "Adiós"','Solo "Hola"'],ans:2,exp:'Primero aparece "Hola", el programa espera 5 segundos, y después aparece "Adiós".'},
+    ]
+  },
+  while:{
+    title:'while True',
+    concepts:[
+      {label:'¿Qué es un bucle infinito?',text:'Con <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">while True:</code> creamos un bucle que se repite infinitamente hasta que nosotros lo detengamos. Se usa cuando queremos que algo se repita sin un límite definido, por ejemplo un menú que sigue apareciendo.'},
+      {label:'Dos puntos obligatorios',text:'Al final de cada condición o estructura en Python (if, elif, else, while, for) siempre va dos puntos <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">:</code> — es obligatorio. El código de adentro va con sangría (Tab).'},
+    ],
+    examples:[
+      {label:'Bucle infinito básico',code:'while True:\n    print("Este mensaje se repite para siempre")'},
+      {label:'Menú que sigue apareciendo',code:'while True:\n    opcion = input("Escoge 1 o 2: ")\n    if opcion == "1":\n        print("Elegiste la opción 1")\n    elif opcion == "2":\n        print("Elegiste la opción 2")'},
+    ],
+    tip:'while True se usa cuando no sabemos cuántas veces se va a repetir. Cuando sí lo sabemos, usamos for.',
+    qs:[
+      {q:'¿Cómo se escribe un bucle infinito en Python?',code:null,opts:['while False:','for always:','while True:','loop():'],ans:2,exp:'"while True:" crea un bucle que se repite infinitamente hasta que nosotros lo detengamos.'},
+      {q:'¿Qué símbolo va al final de la línea "while True"?',code:null,opts:['Un punto  .','Dos puntos  :','Punto y coma  ;','Nada'],ans:1,exp:'Al final de cada condición o estructura en Python siempre van dos puntos ":"'},
+      {q:'¿Cuándo usamos while True?',code:null,opts:['Cuando sabemos exactamente cuántas veces se repite','Cuando queremos que algo se repita indefinidamente','Para recorrer una lista de datos','Para hacer algo solo una vez'],ans:1,exp:'"while True" se usa cuando queremos que el ciclo se repita sin un límite definido.'},
+      {q:'¿Qué tiene de especial while True comparado con while False?',code:null,opts:['Ambos hacen lo mismo','while True nunca entra al ciclo','while True siempre entra y se repite; while False nunca entra','while False es más rápido'],ans:2,exp:'"True" significa verdadero, así que la condición siempre se cumple y el ciclo entra siempre. "False" es falso y nunca entraría.'},
+    ]
+  },
+  for:{
+    title:'for / range',
+    concepts:[
+      {label:'¿Cuándo usamos for?',text:'El ciclo <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">for</code> se usa para cuando sabemos cuántas veces se va a repetir el ciclo. A diferencia de while True, aquí le decimos exactamente cuántas vueltas dar.'},
+      {label:'range() y la variable i',text:'<code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">range(n)</code>: el número dentro de los paréntesis es las veces que se va a repetir el ciclo sin contarlo. Si pongo range(5), se repite 5 veces. La variable <code style="background:var(--color-background-secondary);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)">i</code> es la variable de control: es la que sabe dónde inicia y cuándo termina el ciclo. Inicia en 0 y en el ejemplo llega hasta 4 (0, 1, 2, 3, 4), pero no cuenta el 5.'},
+    ],
+    examples:[
+      {label:'Repetir 5 veces',code:'for i in range(5):\n    print("Vuelta número", i)'},
+      {label:'¿Qué valores toma i con range(5)?',code:'# i vale: 0, 1, 2, 3, 4\n# (empieza en 0, termina antes del 5)'},
+      {label:'Mostrar los números del 1 al 10',code:'for i in range(1, 11):\n    print(i)'},
+    ],
+    tip:'range(5) → i va de 0 a 4 (5 vueltas). range(1, 6) → i va de 1 a 5. El segundo número nunca se cuenta.',
+    qs:[
+      {q:'¿Cuándo usamos un ciclo for?',code:null,opts:['Cuando queremos un bucle infinito','Cuando no sabemos cuántas veces se repite','Cuando sabemos cuántas veces se va a repetir','Para leer datos del usuario'],ans:2,exp:'El ciclo for se usa cuando sabemos cuántas veces se va a repetir el ciclo.'},
+      {q:'¿Cuántas veces se repite este ciclo?',code:'for i in range(5):',opts:['4 veces','5 veces','6 veces','1 vez'],ans:1,exp:'range(5) se repite 5 veces (i vale 0, 1, 2, 3, 4). El número dentro indica las repeticiones.'},
+      {q:'¿Hasta qué número llega la variable i en range(5)?',code:'for i in range(5):\n    print(i)',opts:['Hasta 5','Hasta 4','Hasta 6','Hasta 3'],ans:1,exp:'range(5) va: 0, 1, 2, 3, 4. Llega hasta el 4 porque empieza en 0 y no cuenta el 5.'},
+      {q:'¿Cómo se llama la variable que sabe dónde inicia y cuándo termina el ciclo?',code:null,opts:['range','loop','i (variable de control)','for'],ans:2,exp:'"i" es la variable de control: es la que sabe en qué vuelta va el ciclo.'},
+    ]
+  }
+};
+
+let cTopic=null,cTab='learn',cQ=0,score=0,answered=false;
+
+function renderTopics(){
+  const g=document.getElementById('topicGrid');
+  g.innerHTML=topics.map(t=>`<button class="topic-btn${cTopic===t.id?' active':''}" onclick="selectTopic('${t.id}')"><i class="ti ${t.icon} icon" aria-hidden="true"></i>${t.label}</button>`).join('');
+}
+
+function selectTopic(id){
+  cTopic=id;cTab='learn';cQ=0;score=0;answered=false;
+  renderTopics();renderPanel();
+  document.getElementById('panel').style.display='block';
+  document.getElementById('panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderPanel(){
+  const d=data[cTopic];
+  document.getElementById('panel').innerHTML=`
+    <div class="panel-tabs">
+      <button class="tab${cTab==='learn'?' active':''}" onclick="switchTab('learn')"><i class="ti ti-book" aria-hidden="true" style="margin-right:4px"></i>Explicación</button>
+      <button class="tab${cTab==='quiz'?' active':''}" onclick="switchTab('quiz')"><i class="ti ti-checklist" aria-hidden="true" style="margin-right:4px"></i>Preguntas</button>
+    </div>
+    <div class="tab-content${cTab==='learn'?' active':''}" id="tabLearn">${buildLearn(d)}</div>
+    <div class="tab-content${cTab==='quiz'?' active':''}" id="tabQuiz">${buildQuiz(d)}</div>`;
+}
+
+function buildLearn(d){
+  let h='';
+  d.concepts.forEach(c=>{
+    h+=`<div class="learn-section"><div class="concept-label">${c.label}</div><div class="concept-text">${c.text}</div></div>`;
+  });
+  h+='<hr class="divider"><div class="concept-label">Ejemplos</div>';
+  d.examples.forEach(e=>{
+    h+=`<div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:4px">${e.label}</div><div class="code-example">${e.code}</div>`;
+  });
+  h+=`<div class="tip-box"><i class="ti ti-bulb" aria-hidden="true" style="margin-right:6px"></i>${d.tip}</div>`;
+  h+=`<div style="text-align:right;margin-top:8px"><button onclick="switchTab('quiz')" style="background:#7F77DD;border:none;border-radius:var(--border-radius-md);padding:8px 18px;font-size:13px;cursor:pointer;color:#fff">Ir a preguntas <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>`;
+  return h;
+}
+
+function buildQuiz(d){
+  if(cQ>=d.qs.length){
+    const pct=Math.round((score/d.qs.length)*100);
+    const msg=pct===100?'¡Perfecto! Dominas este tema 🎉':pct>=60?'Buen trabajo, sigue practicando 💪':'Repasa la explicación e inténtalo de nuevo 📖';
+    return `<div class="result-card"><div class="big-score">${score}/${d.qs.length}</div><div class="result-msg">${msg}</div><div class="result-pct">${pct}% correcto</div><div class="result-btns"><button class="retry-btn" onclick="retryQuiz()"><i class="ti ti-refresh" aria-hidden="true"></i> Intentar de nuevo</button><button class="menu-btn" onclick="goLearn()"><i class="ti ti-book" aria-hidden="true"></i> Ver explicación</button></div></div>`;
+  }
+  const q=d.qs[cQ];
+  const prog=((cQ)/d.qs.length*100).toFixed(0);
+  return `<div class="q-meta">Pregunta ${cQ+1} de ${d.qs.length}</div>
+    <div class="progress"><div class="progress-fill" style="width:${prog}%"></div></div>
+    <div class="topic-tag">${topics.find(t=>t.id===cTopic).label}</div>
+    <div class="q-text">${q.q}</div>
+    ${q.code?`<div class="code-block">${q.code}</div>`:''}
+    <div class="options">${q.opts.map((o,i)=>`<button class="opt" onclick="answer(${i})" id="opt${i}">${o}</button>`).join('')}</div>
+    <div class="feedback" id="feedback"></div>
+    <div class="nav-row"><button onclick="next()" id="nextBtn" style="display:none">Siguiente <i class="ti ti-arrow-right" aria-hidden="true"></i></button><span class="score-badge"><i class="ti ti-check" aria-hidden="true"></i> ${score} correctas</span></div>`;
+}
+
+function switchTab(t){cTab=t;renderPanel()}
+
+function answer(i){
+  if(answered)return;
+  answered=true;
+  const q=data[cTopic].qs[cQ];
+  const fb=document.getElementById('feedback');
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  if(i===q.ans){
+    score++;
+    document.getElementById('opt'+i).classList.add('correct');
+    fb.className='feedback show ok';
+    fb.innerHTML='<i class="ti ti-circle-check" aria-hidden="true"></i> ¡Correcto! '+q.exp;
+  } else {
+    document.getElementById('opt'+i).classList.add('wrong');
+    document.getElementById('opt'+q.ans).classList.add('correct');
+    fb.className='feedback show fail';
+    fb.innerHTML='<i class="ti ti-circle-x" aria-hidden="true"></i> No exactamente. '+q.exp;
+  }
+  document.getElementById('nextBtn').style.display='inline-block';
+}
+
+function next(){cQ++;answered=false;document.getElementById('tabQuiz').innerHTML=buildQuiz(data[cTopic])}
+function retryQuiz(){cQ=0;score=0;answered=false;cTab='quiz';renderPanel()}
+function goLearn(){cTab='learn';renderPanel()}
+
+renderTopics();
+</script>
